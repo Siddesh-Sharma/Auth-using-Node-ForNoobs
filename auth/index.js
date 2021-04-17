@@ -6,6 +6,8 @@ users.createIndex("username", { unique: true });
 
 const Joi = require("joi");
 
+const bcrypt = require("bcryptjs");
+
 const schema = Joi.object({
   username: Joi.string()
     .regex(/(^[a-zA-Z0-9_]*$)/)
@@ -32,7 +34,24 @@ router.post("/signup", (req, res, next) => {
       })
       .then((user) => {
         //if user is undefined, username is not in the db or dublicateuser detected
-        res.json({ user });
+        if (user) {
+          //there is already user in the db
+          //respond wirth an error
+          const error = new Error("user already exist");
+          next(error);
+        } else {
+          //hash trhe pass and insert the user with the hashed password
+          bcrypt.hash(req.body.password, 12).then((hashedPassword) => {
+            const newUser = {
+              username: req.body.username,
+              password: hashedPassword,
+            };
+
+            users.insert(newUser).then((insertedUser) => {
+              res.json({ insertedUser });
+            });
+          });
+        }
       });
   } else {
     next(result.error);

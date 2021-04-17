@@ -26,8 +26,8 @@ function notfound(req, res, next) {
 function errorhandler(err, req, res, next) {
   res.status(res.statusCode || 500);
   res.json({
-    message: err.msg,
-    stack: err.err,
+    message: err.message,
+    stack: err.stack,
   });
 }
 
